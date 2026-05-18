@@ -106,11 +106,17 @@ class ContactController extends Controller
         }
 
         // Allow explicit avatar removal
-        if ($request->input('remove_avatar')) {
+        elseif ($request->input('remove_avatar')) {
             if ($contact->avatar) {
                 Storage::disk('public')->delete($contact->avatar);
             }
             $data['avatar'] = null;
+        }
+
+        else {
+            // If no new file was uploaded and we aren't removing it, 
+            // unset the avatar key so we don't accidentally overwrite the DB record with null.
+            unset($data['avatar']);
         }
 
         $contact->update($data);

@@ -1,0 +1,298 @@
+/* ==========================================================================
+   1. FONTS & VARIABLES (Technical Precision Theme)
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root, [data-theme='light'] {
+    --bg: #F5F5F5;
+    --surface: #FFFFFF;
+    --surface2: #EDEDED;
+    --border: #D1D1D1;
+    --text: #0A0A0A;
+    --text-muted: #555555;
+    --primary: #FF0000;
+    --primary-hover: #CC0000;
+    --primary-glow: rgba(255, 0, 0, 0.15);
+    --primary-faint: rgba(255, 0, 0, 0.05);
+    --danger: #FF0000; 
+    --success: #00FF66;
+    --hover: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='dark'] {
+    --bg: #0A0A0A;
+    --surface: #131313;
+    --surface2: #1A1A1A;
+    --border: #333333;
+    --text: #E5E2E1;
+    --text-muted: #929090;
+    --primary: #FF0000;
+    --primary-hover: #FF3333;
+    --primary-glow: rgba(255, 0, 0, 0.25);
+    --primary-faint: rgba(255, 0, 0, 0.1);
+    --danger: #FF0000;
+    --success: #00E65C;
+    --hover: rgba(255, 255, 255, 0.04);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   2. GLOBAL COMPONENTS (Buttons & Inputs)
+   ========================================================================== */
+.btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 4px;
+    font-size: 14px; font-weight: 500; font-family: 'Inter', sans-serif;
+    cursor: pointer; border: 1px solid transparent; text-decoration: none;
+    transition: all 0.2s ease;
+}
+.btn-primary { background: var(--primary); color: #FFF; }
+.btn-primary:hover:not(:disabled) { background: var(--primary-hover); box-shadow: 0 0 12px var(--primary-glow); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-ghost { background: transparent; color: var(--text-muted); }
+.btn-ghost:hover { background: var(--hover); color: var(--text); }
+
+.btn-danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+.btn-danger:hover { background: var(--primary-faint); box-shadow: 0 0 12px var(--primary-glow); }
+
+.btn-icon {
+    padding: 8px; border-radius: 4px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-muted);
+    cursor: pointer; display: inline-flex; align-items: center;
+    transition: all 0.2s ease;
+}
+.btn-icon:hover { background: var(--hover); border-color: var(--primary); color: var(--text); box-shadow: 0 0 8px var(--primary-glow); }
+
+.input, .select, .textarea {
+    width: 100%; padding: 10px 16px; border-radius: 4px;
+    background: #141414; border: 1px solid var(--border);
+    font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text);
+    transition: all 0.2s ease; outline: none;
+}
+[data-theme='light'] .input, [data-theme='light'] .select, [data-theme='light'] .textarea {
+    background: #FFFFFF; border-color: #CCCCCC;
+}
+.input:focus, .select:focus, .textarea:focus {
+    border-color: var(--primary);
+    box-shadow: inset 0 0 4px var(--primary-glow), 0 0 4px var(--primary-glow);
+}
+.input::placeholder, .textarea::placeholder { color: var(--text-muted); }
+.textarea { resize: vertical; min-height: 100px; }
+
+/* ==========================================================================
+   3. PAGE LAYOUT (The missing pieces)
+   ========================================================================== */
+.contacts-wrap, .create-wrap {
+    min-height: 100vh;
+    padding: 32px; /* From DESIGN.md container-padding-desktop */
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.create-wrap { max-width: 800px; }
+
+.page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; flex-wrap: wrap; gap: 16px;
+}
+.page-title {
+    font-size: 24px; font-weight: 600; letter-spacing: -0.01em; color: var(--text);
+}
+.page-title span {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--text-muted); margin-left: 12px; font-weight: 400;
+}
+.header-actions { display: flex; align-items: center; gap: 12px; }
+
+/* Controls & Search */
+.controls { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+.search-wrap { flex: 1; min-width: 250px; position: relative; }
+.search-icon {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted); font-size: 14px; pointer-events: none;
+}
+.search-wrap .input { padding-left: 40px; }
+
+.bulk-bar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 12px 16px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 4px;
+    margin-bottom: 24px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text);
+}
+
+/* ==========================================================================
+   4. TABLE STYLES (Level 1 Surface)
+   ========================================================================== */
+.table-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.table-card:hover { border-color: var(--primary); box-shadow: 0 0 12px var(--primary-glow); }
+
+table { width: 100%; border-collapse: collapse; }
+thead th {
+    padding: 16px; text-align: left;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--text-muted); background: var(--surface2);
+    border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
+}
+thead th:hover { color: var(--text); }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--hover); }
+tbody tr.selected-row { background: var(--primary-faint); }
+
+td { padding: 16px; font-size: 14px; vertical-align: middle; }
+
+.contact-info { display: flex; align-items: center; gap: 16px; }
+.contact-name { font-weight: 600; color: var(--text); font-size: 16px; }
+
+.row-actions { display: flex; gap: 8px; align-items: center; }
+.action-btn {
+    padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border); background: transparent;
+    color: var(--text-muted); text-decoration: none; transition: all 0.2s;
+}
+.action-btn:hover { background: var(--hover); color: var(--text); border-color: var(--primary); box-shadow: 0 0 8px var(--primary-glow); }
+
+.cb { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+
+/* ==========================================================================
+   5. FORM STYLES (For Create.jsx)
+   ========================================================================== */
+.form-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+}
+.avatar-section {
+    padding: 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+}
+.avatar-actions { display: flex; flex-direction: column; gap: 8px; }
+.file-input { display: none; }
+
+.section-heading {
+    padding: 24px 24px 0; font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--text-muted);
+}
+.section-heading::after {
+    content: ''; display: block; height: 1px; background: var(--border); margin-top: 12px;
+}
+
+.form-body { padding: 24px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.label { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); text-transform: uppercase; }
+.field-error { font-size: 12px; color: var(--danger); font-weight: 500; }
+
+.form-footer {
+    display: flex; align-items: center; justify-content: flex-end; gap: 16px;
+    padding: 24px; border-top: 1px solid var(--border); background: var(--surface2);
+}
+
+/* ==========================================================================
+   7. MODALS & OVERLAYS (Technical Precision)
+   ========================================================================== */
+.modal-overlay {
+    position: fixed; 
+    inset: 0; 
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(12px); /* Specifically from DESIGN.md */
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 24px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 100%; 
+    max-width: 600px;
+    max-height: 90vh; 
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5); /* High-contrast elevation */
+}
+
+.modal-header {
+    padding: 24px; 
+    border-bottom: 1px solid var(--border);
+    display: flex; 
+    align-items: flex-start; 
+    justify-content: space-between;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    padding: 16px 24px; 
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex; 
+    justify-content: flex-end; 
+    gap: 12px;
+}
+
+/* Detail Grid for Modal Data */
+.detail-grid {
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 24px;
+    margin-bottom: 24px;
+}
+.detail-group {
+    display: flex; 
+    flex-direction: column; 
+    gap: 6px;
+}
+.detail-label {
+    font-family: 'JetBrains Mono', monospace; 
+    font-size: 11px;
+    color: var(--text-muted); 
+    text-transform: uppercase; 
+    letter-spacing: 0.05em;
+}
+.detail-value {
+    font-size: 14px; 
+    color: var(--text); 
+    font-weight: 500;
+    word-break: break-word;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 600px) {
+    .detail-grid { grid-template-columns: 1fr; gap: 16px; }
+}
+
+/* ==========================================================================
+   6. RESPONSIVE (Mobile specific spacing)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .contacts-wrap, .create-wrap { padding: 16px; } /* From DESIGN.md container-padding-mobile */
+    .hide-mobile { display: none !important; }
+    td, th { padding: 12px; }
+    .grid-2 { grid-template-columns: 1fr; gap: 16px; }
+    .controls { gap: 12px; }
+}
