@@ -50,6 +50,10 @@ export default function ContactsIndex({ contacts, filters, companies, countries 
         });
     }
 
+    function handleLogout() {
+        router.post(route('logout'));
+    }
+
     return (
         <>
         
@@ -62,6 +66,7 @@ export default function ContactsIndex({ contacts, filters, companies, countries 
                             {dark ? '☀️' : '🌙'}
                         </button>
                         <Link href={route('contacts.create')} className="btn btn-primary">+ New Contact</Link>
+                        <button className="btn btn-ghost" onClick={handleLogout}>Logout</button>
                     </div>
                 </div>
 
