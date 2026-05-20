@@ -1,12 +1,10 @@
 import { useState, useCallback } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import debounce from 'lodash/debounce';
-import Avatar from '../../Components/Contacts/Avatar';
-import { SortIcon, Tag, Flash } from '../../Components/Contacts/TableComponents';
+import Avatar from '@/Components/Contacts/Avatar.jsx';
+import { SortIcon, Tag, Flash } from '@/Components/Contacts/TableComponents.jsx';
 import '@/styles/contacts.css';
 import ContactModal from '@/Components/Contacts/ContactModal.jsx';
-
-// STRICTLY use the alias for Context to avoid the Windows Vite duplication bug!
 import { useTheme } from '@/context/ThemeContext.jsx'; 
 
 export default function ContactsIndex({ contacts, filters, companies, countries }) {
@@ -59,17 +57,60 @@ export default function ContactsIndex({ contacts, filters, companies, countries 
         
             <Head title="Contacts"/>
             <div className="contacts-wrap">
-                <div className="page-header">
-                    <div className="page-title">Contacts <span>{contacts.total} total</span></div>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '32px',
+                    paddingBottom: '24px',
+                    borderBottom: '1px solid var(--border)'
+                }}>
+                    <div>
+                        <h1 style={{
+                            fontSize: '32px',
+                            fontWeight: '700',
+                            color: 'var(--primary)',
+                            marginBottom: '8px',
+                            letterSpacing: '-0.01em'
+                        }}>ContactMS</h1>
+                        <p style={{
+                            fontSize: '14px',
+                            color: 'var(--text-muted)',
+                            fontFamily: "'JetBrains Mono', monospace"
+                        }}>Manage your contacts efficiently</p>
+                    </div>
                     <div className="header-actions">
-                        <button className="btn-icon" onClick={toggle} title="Toggle theme">
+                        <button 
+                            className="btn-icon" 
+                            onClick={toggle} 
+                            title="Toggle theme"
+                            style={{ fontSize: '18px', fontWeight: 'bold' }}
+                        >
                             {dark ? '☀️' : '🌙'}
                         </button>
-                        <Link href={route('contacts.create')} className="btn btn-primary">+ New Contact</Link>
-                        <button className="btn btn-ghost" onClick={handleLogout}>Logout</button>
+                        <Link 
+                            href={route('contacts.create')} 
+                            className="btn btn-primary"
+                            style={{ gap: '6px' }}
+                        >
+                            <span>+</span> New Contact
+                        </Link>
+                        <button 
+                            className="btn btn-ghost" 
+                            onClick={handleLogout}
+                            style={{ 
+                                borderColor: 'var(--border)',
+                                border: '1px solid var(--border)'
+                            }}
+                        >
+                            Logout
+                        </button>
                     </div>
                 </div>
 
+                <div className="page-header">
+                    <div className="page-title">Contacts <span>{contacts.total} total</span></div>
+                </div>
                 <Flash message={flash.success} />
                 
                 {/* Search & Filters Controls Component */}
