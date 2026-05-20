@@ -26,15 +26,16 @@ Route::get('/dashboard', function () {
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
         Route::prefix('contacts')->name('contacts.')->group(function () {
-        Route::get('/',              [ContactController::class, 'index'])->name('index');
-        Route::get('/create',        [ContactController::class, 'create'])->name('create');
-        Route::post('/',             [ContactController::class, 'store'])->name('store');
-        Route::get('/{contact}/edit',[ContactController::class, 'edit'])->name('edit');
-        Route::put('/{contact}',     [ContactController::class, 'update'])->name('update');
-        Route::delete('/{contact}',  [ContactController::class, 'destroy'])->name('destroy');
-    
-        // Bulk delete — POST so we can send a body with an array of IDs
-        Route::post('/bulk-destroy', [ContactController::class, 'bulkDestroy'])->name('bulk-destroy');
+            Route::get('/',              [ContactController::class, 'index'])->name('index');
+            Route::get('/create',        [ContactController::class, 'create'])->name('create');
+            Route::post('/',             [ContactController::class, 'store'])->name('store');
+            Route::get('/{contact}/edit',[ContactController::class, 'edit'])->name('edit');
+            Route::put('/{contact}',     [ContactController::class, 'update'])->name('update');
+            Route::delete('/{contact}',  [ContactController::class, 'destroy'])->name('destroy');
+        
+            // Bulk delete — POST so we can send a body with an array of IDs
+            Route::post('/bulk-destroy', [ContactController::class, 'bulkDestroy'])->name('bulk-destroy');
+        });
 
         Route::prefix('tasks')->name('tasks.')->group(function () {
             Route::get('/',              [TaskController::class, 'index'])->name('index');
@@ -47,6 +48,5 @@ Route::get('/dashboard', function () {
                 ->name('attachments.destroy');
         });
     });
-});
 
 require __DIR__.'/auth.php';

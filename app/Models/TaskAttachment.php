@@ -33,7 +33,17 @@ class TaskAttachment extends Model
 
     public function getUrlAttribute(): string
     {
-        return Storage::disk($this->disk)->url($this->stored_path);
+        if (!$this->stored_path) {
+            return '';
+        }
+
+        // Fallback to 'public' if the disk isn't set in older database records
+        $diskName = $this->disk ?? 'public';
+
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk($diskName);
+
+        return $disk->url($this->stored_path);
     }
 
     public function getFormattedSizeAttribute(): string
