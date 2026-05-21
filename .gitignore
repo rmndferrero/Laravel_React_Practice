@@ -20,5 +20,7 @@ yarn-error.log
 /.idea
 /.nova
 /.vscode
-/.zed
-/.laravel
+/.zedgit
+*.sqlite
+*.db
+laravel

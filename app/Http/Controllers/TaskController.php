@@ -12,11 +12,8 @@ use Inertia\Inertia;
 
 class TaskController extends Controller
 {
-    // Max file size in KB (10 MB)
-    const MAX_FILE_KB = 10240;
-
-    // Allowed mime types
-    const ALLOWED_MIMES = [
+    const MAX_FILE_KB    = 10240;
+    const ALLOWED_MIMES  = [
         'image/jpeg', 'image/png', 'image/gif', 'image/webp',
         'application/pdf',
         'application/msword',
@@ -37,15 +34,13 @@ class TaskController extends Controller
             ->filterByStatus($request->input('status'))
             ->filterByPriority($request->input('priority'));
 
-        // Sorting
         $sortField     = $request->input('sort', 'created_at');
         $sortDirection = $request->input('direction', 'desc');
         $allowedSorts  = ['name', 'status', 'priority', 'due_at', 'created_at'];
 
         if (in_array($sortField, $allowedSorts)) {
-            // NULL due_at should always go last
             if ($sortField === 'due_at') {
-                $query->orderByRaw("due_at IS NULL ASC")->orderBy('due_at', $sortDirection);
+                $query->orderByRaw('due_at IS NULL ASC')->orderBy('due_at', $sortDirection);
             } else {
                 $query->orderBy($sortField, $sortDirection === 'desc' ? 'desc' : 'asc');
             }
@@ -56,13 +51,10 @@ class TaskController extends Controller
             ->withQueryString()
             ->through(fn ($t) => $this->formatTask($t));
 
-        // Stats for the summary bar
-        $stats = $this->getStats(Auth::id());
-
         return Inertia::render('Tasks/Index', [
-            'tasks'   => $tasks,
-            'stats'   => $stats,
-            'filters' => $request->only(['search', 'status', 'priority', 'sort', 'direction']),
+            'tasks'      => $tasks,
+            'stats'      => $this->getStats(Auth::id()),
+            'filters'    => $request->only(['search', 'status', 'priority', 'sort', 'direction']),
             'statuses'   => Task::STATUSES,
             'priorities' => Task::PRIORITIES,
         ]);
@@ -72,12 +64,11 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
-        $data = $this->validateTask($request);
+        $data            = $this->validateTask($request);
         $data['user_id'] = Auth::id();
 
         $task = Task::create($data);
 
-        // Handle file attachments
         if ($request->hasFile('attachments')) {
             $this->storeAttachments($task, $request->file('attachments'));
         }
@@ -95,9 +86,30 @@ class TaskController extends Controller
         $data = $this->validateTask($request, $task->id);
         $task->update($data);
 
-        // New attachments added during edit
+        // Attachment diffing:
+        // Frontend sends keep_attachment_ids[] for every attachment the user kept.
+        // Anything NOT in that list gets physically deleted and removed from DB.
+        $keepIds = collect($request->input('keep_attachment_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->toArray();
+
+        $currentAttachments = TaskAttachment::where('task_id', $task->id)->get();
+
+        foreach ($currentAttachments as $attachment) {
+            if (!in_array($attachment->id, $keepIds)) {
+                Storage::disk($attachment->disk)->delete($attachment->stored_path);
+                $attachment->delete();
+            }
+        }
+
+        // Add newly uploaded files, respecting the 10-file cap
         if ($request->hasFile('attachments')) {
-            $this->storeAttachments($task, $request->file('attachments'));
+            $remaining = 10 - count($keepIds);
+            $newFiles  = array_slice($request->file('attachments'), 0, max(0, $remaining));
+            if (!empty($newFiles)) {
+                $this->storeAttachments($task, $newFiles);
+            }
         }
 
         return redirect()->route('tasks.index')
@@ -110,7 +122,6 @@ class TaskController extends Controller
     {
         $this->authorizeTask($task);
 
-        // Delete all physical attachment files
         foreach ($task->attachments as $attachment) {
             Storage::disk($attachment->disk)->delete($attachment->stored_path);
         }
@@ -121,11 +132,10 @@ class TaskController extends Controller
             ->with('success', 'Task deleted.');
     }
 
-    // ── Delete a single attachment ────────────────────────────────────────────
+    // ── Delete single attachment ──────────────────────────────────────────────
 
     public function destroyAttachment(TaskAttachment $attachment)
     {
-        // Ensure the attachment belongs to the authenticated user's task
         if ($attachment->task->user_id !== Auth::id()) {
             abort(403);
         }
@@ -165,7 +175,6 @@ class TaskController extends Controller
     private function storeAttachments(Task $task, array $files): void
     {
         foreach ($files as $file) {
-            // Store with a UUID filename to avoid collisions, keep extension
             $extension  = $file->getClientOriginalExtension();
             $storedPath = 'files_uploaded/' . Str::uuid() . '.' . $extension;
 

@@ -29,12 +29,14 @@ Route::get('/dashboard', function () {
             Route::get('/',              [ContactController::class, 'index'])->name('index');
             Route::get('/create',        [ContactController::class, 'create'])->name('create');
             Route::post('/',             [ContactController::class, 'store'])->name('store');
+            
+            // Bulk delete — POST so we can send a body with an array of IDs
+            // Define before dynamic {contact} routes to avoid route conflicts
+            Route::post('/bulk-destroy', [ContactController::class, 'bulkDestroy'])->name('bulk-destroy');
+            
             Route::get('/{contact}/edit',[ContactController::class, 'edit'])->name('edit');
             Route::put('/{contact}',     [ContactController::class, 'update'])->name('update');
             Route::delete('/{contact}',  [ContactController::class, 'destroy'])->name('destroy');
-        
-            // Bulk delete — POST so we can send a body with an array of IDs
-            Route::post('/bulk-destroy', [ContactController::class, 'bulkDestroy'])->name('bulk-destroy');
         });
 
         Route::prefix('tasks')->name('tasks.')->group(function () {
