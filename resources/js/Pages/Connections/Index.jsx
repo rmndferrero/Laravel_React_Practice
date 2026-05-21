@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage, Link } from '@inertiajs/react';
 import { useState, useCallback } from 'react';
 import debounce from 'lodash/debounce';
 import AppLayout from '@/Layouts/AppLayout';
@@ -132,7 +132,7 @@ export default function ConnectionsIndex({ pendingRequests, activeConnections, s
                                         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{user.email}</div>
                                     </div>
                                     <div style={{ display: 'flex', gap: 8 }}>
-                                        <button className="btn btn-ghost" style={{ padding: '4px 12px', fontSize: 11 }}>MESSAGE</button>
+                                        <Link href={route('conversations.direct', user.id)} method="post" as="button" className="btn btn-ghost" style={{ padding: '4px 12px', fontSize: 11 }}>MESSAGE</Link>
                                         {/* To remove an active connection, we need to pass the connection ID, not the user ID. We'll handle this detail when we link it up perfectly, for now UI placeholder. */}
                                     </div>
                                 </div>

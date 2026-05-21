@@ -8,7 +8,9 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\ConversationController;
 use Illuminate\Support\Facades\Auth;
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -121,6 +123,15 @@ Route::get('/dashboard', function () {
             // Group Members Management
             Route::post('/{group}/members', [GroupController::class, 'addMember'])->name('members.add');
             Route::delete('/{group}/members/{user}', [GroupController::class, 'removeMember'])->name('members.remove');
+        });
+
+        // --- CHAT & CONVERSATIONS ---
+        Route::prefix('conversations')->name('conversations.')->group(function () {
+            Route::post('/direct/{user}', [ConversationController::class, 'startDirect'])->name('direct');
+            Route::post('/group/{group}', [ConversationController::class, 'startGroup'])->name('group');
+            
+            Route::get('/{conversation}', [ConversationController::class, 'show'])->name('show');
+            Route::post('/{conversation}/messages', [ConversationController::class, 'store'])->name('messages.store');
         });
     });
 

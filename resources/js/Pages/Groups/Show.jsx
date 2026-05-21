@@ -76,6 +76,16 @@ export default function GroupShow({ group, availableConnections, tasks, isAdmin,
                             <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)', margin: 0 }}>Group Tasks</h2>
                             <button onClick={() => setShowTaskModal(true)} className="btn btn-primary" style={{ fontSize: 12 }}>+ New Group Task</button>
                         </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)', margin: 0 }}>Group Tasks</h2>
+                            <div style={{ display: 'flex', gap: 12 }}>
+                                <Link href={route('conversations.group', group.id)} method="post" as="button" className="btn btn-ghost" style={{ fontSize: 12, border: '1px solid var(--border)' }}>
+                                    💬 Open Group Chat
+                                </Link>
+                                <button onClick={() => setShowTaskModal(true)} className="btn btn-primary" style={{ fontSize: 12 }}>+ New Group Task</button>
+                            </div>
+                        </div>
                         
                         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
                             {tasks.length === 0 ? (
