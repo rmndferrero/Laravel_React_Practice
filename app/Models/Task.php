@@ -48,6 +48,8 @@ class Task extends Model
         'priority',
         'due_at',
         'tags',
+        'group_id',    // <-- ADD THIS
+        'assigned_to'
     ];
 
     protected $casts = [
@@ -131,5 +133,15 @@ class Task extends Model
     {
         if (!$priority) return $query;
         return $query->where('priority', $priority);
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+    public function assignee()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 }

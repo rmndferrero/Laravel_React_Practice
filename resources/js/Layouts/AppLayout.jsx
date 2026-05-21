@@ -17,6 +17,7 @@ const NAV_ITEMS = [
             </svg>
         ),
     },
+    
     {
         key: 'tasks',
         label: 'Tasks',
@@ -28,10 +29,11 @@ const NAV_ITEMS = [
             </svg>
         ),
     },
+
     {
-        key: 'contacts',
-        label: 'Contacts',
-        route: 'contacts.index',
+        key: 'connections',
+        label: 'Connections',
+        route: 'connections.index',
         icon: (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
@@ -41,6 +43,37 @@ const NAV_ITEMS = [
             </svg>
         ),
     },
+    
+    {
+        key: 'groups',
+        label: 'Groups',
+        route: 'groups.index',
+        icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="7" r="3" />
+                <circle cx="17" cy="9" r="2.5" />
+                <path d="M3 20v-1a5 5 0 015-5h2a5 5 0 015 5v1" />
+                <path d="M14 20v-1a4 4 0 014-4h1a4 4 0 014 4v1" />
+            </svg>
+        ),
+    },
+
+    
+    {
+        key: 'contacts',
+        label: 'Contacts',
+        route: 'contacts.index',
+        icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="7" r="2" />
+                <path d="M5 21v-1a4 4 0 014-4h0a4 4 0 014 4v1" />
+                <line x1="15" y1="7" x2="21" y2="7" />
+                <line x1="15" y1="12" x2="21" y2="12" />
+                <line x1="15" y1="17" x2="21" y2="17" />
+            </svg>
+        ),
+    },
+        
     {
         key: 'settings',
         label: 'Settings',

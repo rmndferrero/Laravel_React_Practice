@@ -185,8 +185,9 @@ function FileRow({ file, onRemove, isExisting }) {
 }
 
 // ── Main modal ────────────────────────────────────────────────────────────────
+// Add editTask = null to the props!
+export default function CreateTaskModal({ isOpen, onClose, statuses, priorities, groupId = null, editTask = null }) {
 
-export default function CreateTaskModal({ onClose, editTask = null }) {
     const isEditing = !!editTask;
     const fileInputRef = useRef();
 
@@ -198,7 +199,7 @@ export default function CreateTaskModal({ onClose, editTask = null }) {
         editTask?.attachments ?? []
     );
 
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         name:          editTask?.name          ?? '',
         description:   editTask?.description   ?? '',
         status:        editTask?.status        ?? 'pending',
@@ -210,6 +211,7 @@ export default function CreateTaskModal({ onClose, editTask = null }) {
         tags:          editTask?.tags          ?? '',
         contact_id:    editTask?.contact_id    ?? '',
         _method:       isEditing ? 'PUT' : 'POST',
+        group_id: groupId || '',
     });
 
     // Close on Escape

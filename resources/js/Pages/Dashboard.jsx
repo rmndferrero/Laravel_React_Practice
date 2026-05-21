@@ -105,16 +105,17 @@ function EmptyState({ message }) {
     );
 }
 
-export default function Dashboard() {
+// Added the data props here:
+export default function Dashboard({ taskStats, contactStats, upcomingTasks, recentContacts }) {
     const { props } = usePage();
     const user = props.auth?.user;
 
-    // Placeholder data — will be replaced by real query props later
+    // Wired the real backend data into your stats array
     const stats = [
-        { label: 'Total Tasks',    value: '—',  sub: 'No tasks yet',          accent: true },
-        { label: 'In Progress',    value: '—',  sub: 'Active work items'                   },
-        { label: 'Completed',      value: '—',  sub: 'Finished tasks'                      },
-        { label: 'Total Contacts', value: '—',  sub: 'In your address book'                },
+        { label: 'Total Tasks',    value: taskStats?.total || 0,       sub: 'Registered tasks',       accent: true },
+        { label: 'In Progress',    value: taskStats?.in_progress || 0, sub: 'Active work items' },
+        { label: 'Overdue',        value: taskStats?.overdue || 0,     sub: 'Needs immediate action' },
+        { label: 'Total Contacts', value: contactStats?.total || 0,    sub: 'In your address book' },
     ];
 
     return (
@@ -178,27 +179,98 @@ export default function Dashboard() {
             >
                 {/* Recent Tasks */}
                 <div>
-                    <SectionHeading title="Recent Tasks"/>
+                    <SectionHeading title="Upcoming Tasks" />
                     <div style={{
                         background: 'var(--surface)',
                         border: '1px solid var(--border)',
                         borderRadius: 8,
                         overflow: 'hidden',
                     }}>
-                        <EmptyState message="// Tasks will appear here" />
+                        {upcomingTasks && upcomingTasks.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                {upcomingTasks.map((task, i) => (
+                                    <div key={task.id} style={{
+                                        padding: '16px 20px',
+                                        borderBottom: i !== upcomingTasks.length - 1 ? '1px solid var(--border)' : 'none',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'flex-start'
+                                    }}>
+                                        <div>
+                                            <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)', marginBottom: 6 }}>
+                                                {task.name}
+                                            </div>
+                                            <div style={{
+                                                fontFamily: "'JetBrains Mono', monospace",
+                                                fontSize: 10,
+                                                textTransform: 'uppercase',
+                                                color: 'var(--text-muted)'
+                                            }}>
+                                                <span style={{ color: task.priority_color }}>{task.priority_label}</span> • {task.status_label}
+                                            </div>
+                                        </div>
+                                        <div style={{
+                                            fontFamily: "'JetBrains Mono', monospace",
+                                            fontSize: 11,
+                                            color: task.is_overdue ? 'var(--primary)' : 'var(--text-muted)',
+                                            textAlign: 'right'
+                                        }}>
+                                            {task.due_at_human || 'NO DEADLINE'}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <EmptyState message="// No upcoming tasks" />
+                        )}
                     </div>
                 </div>
 
                 {/* Recent Contacts */}
                 <div>
-                    <SectionHeading title="Recent Contacts"/>
+                    <SectionHeading title="Recent Contacts" />
                     <div style={{
                         background: 'var(--surface)',
                         border: '1px solid var(--border)',
                         borderRadius: 8,
                         overflow: 'hidden',
                     }}>
-                        <EmptyState message="// Contacts will appear here" />
+                        {/* We leave this empty for now until you query recent contacts in the backend! */}
+                {recentContacts && recentContacts.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {recentContacts.map((contact, i) => (
+                        <div key={contact.id} style={{
+                            padding: '16px 20px',
+                            borderBottom: i !== recentContacts.length - 1 ? '1px solid var(--border)' : 'none',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}>
+                            <div>
+                                <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)', marginBottom: 4 }}>
+                                    {contact.full_name}
+                                </div>
+                                <div style={{
+                                    fontFamily: "'JetBrains Mono', monospace",
+                                    fontSize: 11,
+                                    color: 'var(--text-muted)'
+                                }}>
+                                    {contact.company || 'NO_COMPANY'}
+                                </div>
+                            </div>
+                            <div style={{
+                                fontSize: 12,
+                                color: 'var(--text-muted)',
+                                textAlign: 'right'
+                            }}>
+                                {contact.email || '—'}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <EmptyState message="// No recent contacts" />
+            )}
                     </div>
                 </div>
             </div>

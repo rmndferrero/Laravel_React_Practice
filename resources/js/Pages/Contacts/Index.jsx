@@ -3,15 +3,14 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import debounce from 'lodash/debounce';
 import Avatar from '@/Components/Contacts/Avatar';
 import { SortIcon, Tag, Flash } from '@/Components/Contacts/TableComponents';
-import '@/styles/contacts.css';
 import ContactModal from '@/Components/Contacts/ContactModal.jsx';
-// STRICTLY use the alias for Context to avoid the Windows Vite duplication bug!
 import AppLayout from '@/Layouts/AppLayout';
+import '@/styles/contacts.css'; // Kept for any leftover base component styles
 
 export default function ContactsIndex({ contacts, filters, companies, countries }) {
     const { props } = usePage();
     const flash = props.flash ?? {};
-    // Removed the duplicate state declarations
+    
     const [selected, setSelected] = useState([]);
     const [confirmBulk, setConfirmBulk] = useState(false);
     const [viewContact, setViewContact] = useState(null);
@@ -23,7 +22,6 @@ export default function ContactsIndex({ contacts, filters, companies, countries 
     );
 
     const handleSearch = (e) => applyFilter({ search: e.target.value, page: 1 });
-    const handleFilter = (key, value) => router.get(route('contacts.index'), { ...filters, [key]: value, page: 1 }, { preserveState: true, replace: true });
     
     function handleSort(field) {
         const direction = filters.sort === field && filters.direction === 'asc' ? 'desc' : 'asc';
@@ -41,140 +39,232 @@ export default function ContactsIndex({ contacts, filters, companies, countries 
     }
 
     function bulkDelete() {
-        console.log('bulkDelete called with ids:', selected);
-        console.log('route name:', 'contacts.bulk-destroy');
         router.post(route('contacts.bulk-destroy'), { ids: selected }, {
+            preserveScroll: true,
             onSuccess: () => { 
-                console.log('Bulk delete successful');
                 setSelected([]); 
                 setConfirmBulk(false); 
-            },
-            onError: (errors) => {
-                console.error('Bulk delete error:', errors);
             },
         });
     }
 
-    function handleLogout() {
-        router.post(route('logout'));
-    }
-
     return (
-        <>
-            <AppLayout currentPage="contacts">
-                <Head title="Contacts"/>
-                <div className="contacts-wrap">
-                    <div className="page-header">
-                        <div className="page-title">Contacts <span>{contacts.total} total</span></div>
-                        <div className="header-actions">
-                            <Link href={route('contacts.create')} className="btn btn-primary">+ New Contact</Link>
-                            <button className="btn btn-ghost" onClick={handleLogout}>Logout</button>
+        <AppLayout currentPage="contacts">
+            <Head title="Contacts"/>
+            
+            <div style={{ paddingBottom: 60 }}>
+                {/* Page Header */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
+                    marginBottom: 24,
+                    borderBottom: '1px solid var(--border)',
+                    paddingBottom: 24,
+                    gap: 16,
+                    flexWrap: 'wrap',
+                }}>
+                    <div>
+                        <div style={{
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: 11,
+                            letterSpacing: '0.1em',
+                            textTransform: 'uppercase',
+                            color: 'var(--text-muted)',
+                            marginBottom: 6,
+                        }}>
                         </div>
+                        <h1 style={{
+                            fontSize: 28,
+                            fontWeight: 700,
+                            color: 'var(--text)',
+                            letterSpacing: '-0.02em',
+                            margin: 0,
+                        }}>
+                            Contacts
+                            <span style={{
+                                fontFamily: "'JetBrains Mono', monospace",
+                                fontSize: 13,
+                                fontWeight: 400,
+                                color: 'var(--text-muted)',
+                                marginLeft: 12,
+                            }}>
+                                {contacts.total} total
+                            </span>
+                        </h1>
                     </div>
 
-                    <Flash message={flash.success} />
-                    
-                    {/* Search & Filters Controls Component */}
-                    <div className="controls">
-                        <div className="search-wrap">
-                            <span className="search-icon">🔍</span>
-                            <input className="input" type="search" placeholder="Search..." defaultValue={filters.search ?? ''} onChange={handleSearch} />
-                        </div>
-                    </div>
+                    <Link href={route('contacts.create')} className="btn btn-primary" style={{ alignSelf: 'flex-end' }}>
+                        + New Contact
+                    </Link>
+                </div>
 
-                    {/* Bulk Delete Bar */}
-                    {selected.length > 0 && (
-                        <div className="bulk-bar">
-                            <span>{selected.length} selected</span>
-                            <button className="btn btn-danger" onClick={() => setConfirmBulk(true)}>🗑 Delete Selected</button>
-                            <button className="btn btn-ghost" style={{ marginLeft: 'auto' }} onClick={() => setSelected([])}>Deselect All</button>
-                        </div>
-                    )}
-
-                    {/* Data Table */}
-                    <div className="table-card">
-                        {contacts.data.length === 0 ? (
-                            <div className="empty"><h3>No contacts found</h3></div>
-                        ) : (
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style={{ width: 40 }}><input type="checkbox" className="cb" checked={allChecked} onChange={toggleAll} /></th>
-                                        <th onClick={() => handleSort('last_name')}>Name <SortIcon field="last_name" currentSort={filters.sort} direction={filters.direction} /></th>
-                                        <th className="hide-mobile" onClick={() => handleSort('email')}>Email<SortIcon field="email" currentSort={filters.sort} direction={filters.direction}/></th>
-                                        <th className="hide-mobile">Phone</th>
-                                        <th className="hide-mobile" onClick={() => handleSort('company')}>Company<SortIcon field="company" currentSort={filters.sort} direction={filters.direction}/></th>
-                                        <th className="hide-mobile">Tags</th>
-                                        <th className="hide-mobile">Notes</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {contacts.data.map(contact => (
-                                        <tr 
-                                            key={contact.id} 
-                                            className={selected.includes(contact.id) ? 'selected-row' : ''}
-                                            onClick={() => setViewContact(contact)} 
-                                            style={{ cursor: 'pointer' }}
-                                        >
-                                            <td onClick={e => e.stopPropagation()}>
-                                                <input type="checkbox" className="cb" checked={selected.includes(contact.id)} onChange={() => toggleOne(contact.id)} />
-                                            </td>
-                                            
-                                            <td>
-                                                <div className="contact-info">
-                                                    <Avatar contact={contact} size={38} />
-                                                    <div><div className="contact-name">{contact.full_name}</div></div>
-                                                </div>
-                                            </td>
-                                            <td className="hide-mobile">{contact.email ?? '—'}</td>
-                                            <td className="hide-mobile">{contact.phone ?? '—'}</td>
-                                            <td className="hide-mobile">{contact.company ?? '—'}</td>
-                                            <td className="hide-mobile">
-                                                {contact.tags_array?.slice(0, 3).map(tag => <Tag key={tag} label={tag} />)}
-                                            </td>
-                                            <td className="hide-mobile">{contact.notes ?? '—'}</td>
-
-                                            <td onClick={e => e.stopPropagation()}>
-                                                <div className="row-actions">
-                                                    <Link href={route('contacts.edit', contact.id)} className="action-btn">✏️</Link>
-                                                    <button className="action-btn danger" onClick={() => deleteSingle(contact.id)}>🗑</button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
+                <Flash message={flash.success} />
+                
+                {/* Search & Controls */}
+                <div style={{ display: 'flex', gap: 10, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    <div style={{ position: 'relative', width: '100%', maxWidth: 400, minWidth: 200 }}>
+                        <span style={{
+                            position: 'absolute', left: 12, top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: 'var(--text-muted)', fontSize: 13, pointerEvents: 'none',
+                        }}>🔍</span>
+                        <input 
+                            className="input" 
+                            type="search" 
+                            placeholder="Search contacts..." 
+                            defaultValue={filters.search ?? ''} 
+                            onChange={handleSearch} 
+                            style={{ paddingLeft: 36, width: '100%' }}
+                        />
                     </div>
                 </div>
-                {confirmBulk && (
-                    <div className="overlay" onClick={() => setConfirmBulk(false)}>
-                        {/* Removed style={theme} here because it is no longer defined */}
-                        <div className="confirm-card" onClick={e => e.stopPropagation()}>
-                            <h3>Delete {selected.length} contacts?</h3>
-                            <div className="confirm-actions">
-                                <button className="btn btn-ghost" onClick={() => setConfirmBulk(false)}>Cancel</button>
-                                <button
-                                    className="btn btn-danger"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        bulkDelete();
-                                    }}
-                                >
-                                    Yes, Delete
-                                </button>
-                            </div>
+
+                {/* Bulk Delete Bar */}
+                {selected.length > 0 && (
+                    <div style={{
+                        background: 'var(--primary-faint)',
+                        border: '1px solid var(--primary)',
+                        borderRadius: 8,
+                        padding: '12px 20px',
+                        marginBottom: 24,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        animation: 'fadeIn 0.2s ease-out'
+                    }}>
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--primary)', fontWeight: 600, letterSpacing: '0.05em' }}>
+                            {selected.length} RECORD(S) SELECTED
+                        </span>
+                        <div style={{ display: 'flex', gap: 12 }}>
+                            <button className="btn btn-ghost" onClick={() => setSelected([])} style={{ background: 'transparent' }}>Deselect All</button>
+                            <button className="btn btn-danger" onClick={() => setConfirmBulk(true)}>Delete Selected</button>
                         </div>
                     </div>
                 )}
 
-                {/* The New Detail View Modal */}
-                <ContactModal 
-                    contact={viewContact} 
-                    onClose={() => setViewContact(null)} 
-                />
-                </AppLayout>
-        </>
+                {/* Data Table Container */}
+                <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 8,
+                    overflowX: 'auto',
+                }}>
+                    {contacts.data.length === 0 ? (
+                        <div style={{ padding: '60px 24px', textAlign: 'center' }}>
+                            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 12 }}>
+                                No records found
+                            </div>
+                            <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Try adjusting your search or create a new contact.</div>
+                        </div>
+                    ) : (
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>
+                                    <th style={{ padding: '12px 20px', width: 40 }}>
+                                        <input type="checkbox" className="cb" checked={allChecked} onChange={toggleAll} />
+                                    </th>
+                                    <th onClick={() => handleSort('last_name')} style={thStyle}>
+                                        <div style={thFlex}>NAME <SortIcon field="last_name" currentSort={filters.sort} direction={filters.direction} /></div>
+                                    </th>
+                                    <th className="hide-mobile" onClick={() => handleSort('email')} style={thStyle}>
+                                        <div style={thFlex}>EMAIL <SortIcon field="email" currentSort={filters.sort} direction={filters.direction}/></div>
+                                    </th>
+                                    <th className="hide-mobile" style={thStyle}>PHONE</th>
+                                    <th className="hide-mobile" onClick={() => handleSort('company')} style={thStyle}>
+                                        <div style={thFlex}>ORGANIZATION <SortIcon field="company" currentSort={filters.sort} direction={filters.direction}/></div>
+                                    </th>
+                                    <th className="hide-mobile" style={thStyle}>TAGS</th>
+                                    <th style={{ ...thStyle, textAlign: 'right' }}>ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {contacts.data.map((contact, index) => (
+                                    <tr 
+                                        key={contact.id} 
+                                        onClick={() => setViewContact(contact)} 
+                                        style={{ 
+                                            borderBottom: index !== contacts.data.length - 1 ? '1px solid var(--border)' : 'none',
+                                            cursor: 'pointer',
+                                            background: selected.includes(contact.id) ? 'var(--hover)' : 'transparent',
+                                            transition: 'background 0.15s ease'
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.background = 'var(--hover)'}
+                                        onMouseLeave={e => e.currentTarget.style.background = selected.includes(contact.id) ? 'var(--hover)' : 'transparent'}
+                                    >
+                                        <td onClick={e => e.stopPropagation()} style={{ padding: '14px 20px' }}>
+                                            <input type="checkbox" className="cb" checked={selected.includes(contact.id)} onChange={() => toggleOne(contact.id)} />
+                                        </td>
+                                        <td style={{ padding: '14px 20px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                <Avatar contact={contact} size={36} />
+                                                <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>
+                                                    {contact.full_name}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="hide-mobile" style={{ padding: '14px 20px', fontSize: 13, color: 'var(--text-muted)' }}>{contact.email ?? '—'}</td>
+                                        <td className="hide-mobile" style={{ padding: '14px 20px', fontSize: 13, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{contact.phone ?? '—'}</td>
+                                        <td className="hide-mobile" style={{ padding: '14px 20px', fontSize: 13, color: 'var(--text-muted)' }}>{contact.company ?? '—'}</td>
+                                        <td className="hide-mobile" style={{ padding: '14px 20px' }}>
+                                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                                {contact.tags_array?.slice(0, 2).map(tag => (
+                                                    <span key={tag} style={{ 
+                                                        fontFamily: "'JetBrains Mono', monospace", fontSize: 10, padding: '2px 8px', borderRadius: 2, 
+                                                        background: 'var(--surface2)', color: 'var(--text-muted)', border: '1px solid var(--border)' 
+                                                    }}>{tag}</span>
+                                                ))}
+                                                {contact.tags_array?.length > 2 && (
+                                                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: 'var(--text-muted)' }}>+{contact.tags_array.length - 2}</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td onClick={e => e.stopPropagation()} style={{ padding: '14px 20px', textAlign: 'right' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+                                                <Link href={route('contacts.edit', contact.id)} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 16 }}>✏️</Link>
+                                                <button onClick={() => deleteSingle(contact.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 16 }}>🗑</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+            </div>
+
+            {/* Bulk Confirm Modal */}
+            {confirmBulk && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }} onClick={() => setConfirmBulk(false)}>
+                    <div onClick={e => e.stopPropagation()} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 32, width: '100%', maxWidth: 400 }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)', margin: '0 0 16px 0' }}>Delete {selected.length} contacts?</h3>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 }}>
+                            <button className="btn btn-ghost" onClick={() => setConfirmBulk(false)}>Cancel</button>
+                            <button className="btn btn-danger" onClick={bulkDelete}>Yes, Delete</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Detail Modal */}
+            <ContactModal contact={viewContact} onClose={() => setViewContact(null)} />
+        </AppLayout>
     );
 }
+
+// Reusable inline styles for table headers to keep markup clean
+const thStyle = {
+    padding: '12px 20px',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 11,
+    letterSpacing: '0.05em',
+    color: 'var(--text-muted)',
+    cursor: 'pointer',
+    userSelect: 'none'
+};
+
+const thFlex = {
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: 6
+};

@@ -488,7 +488,6 @@ export default function TasksIndex({ tasks, stats, filters, statuses, priorities
                         fontSize: 11, letterSpacing: '0.1em',
                         textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 6,
                     }}>
-                        Task Management
                     </div>
                     <h1 style={{
                         fontSize: 28, fontWeight: 700, color: 'var(--text)',

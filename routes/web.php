@@ -5,7 +5,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ContactController;
- use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\ConnectionController;
+use App\Http\Controllers\GroupController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -17,7 +20,58 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+        $userId = Auth::id();
+        // 1. Task Statistics
+        $taskBase = \App\Models\Task::where('user_id', $userId);
+        $taskStats = [
+            'total'       => (clone $taskBase)->count(),
+            'pending'     => (clone $taskBase)->where('status', 'pending')->count(),
+            'in_progress' => (clone $taskBase)->where('status', 'in_progress')->count(),
+            'completed'   => (clone $taskBase)->where('status', 'completed')->count(),
+            'overdue'     => (clone $taskBase)
+                ->whereNotIn('status', ['completed', 'cancelled'])
+                ->whereNotNull('due_at')
+                ->where('due_at', '<', now())
+                ->count(),
+        ];
+
+        // 2. Contact Statistics
+        $contactStats = [
+            'total' => \App\Models\Contact::where('user_id', $userId)->count(),
+        ];
+
+        // 3. Upcoming Tasks (Next 5 active tasks ordered by deadline)
+        $upcomingTasks = \App\Models\Task::where('user_id', $userId)
+            ->whereNotIn('status', ['completed', 'cancelled'])
+            ->orderByRaw('due_at IS NULL ASC') // Put null deadlines at the bottom
+            ->orderBy('due_at', 'asc')
+            ->take(5)
+            ->get()
+            ->map(fn ($task) => [
+                'id'             => $task->id,
+                'name'           => $task->name,
+                'status_label'   => $task->status_label,
+                'priority_label' => $task->priority_label,
+                'priority_color' => $task->priority_color,
+                'due_at_human'   => $task->due_at ? $task->due_at->format('M j, Y') : null,
+                'is_overdue'     => $task->is_overdue,
+            ]);
+        $recentContacts = \App\Models\Contact::where('user_id', $userId)
+        ->orderBy('created_at', 'desc')
+        ->take(5)
+        ->get()
+        ->map(fn ($contact) => [
+            'id'        => $contact->id,
+            'full_name' => $contact->full_name,
+            'company'   => $contact->company,
+            'email'     => $contact->email,
+        ]);
+        return Inertia::render('Dashboard', [
+            'taskStats' => $taskStats,
+            'contactStats' => $contactStats,
+            'upcomingTasks' => $upcomingTasks,
+            'recentContacts' => $recentContacts,
+        ]);
     })->middleware(['auth', 'verified'])->name('dashboard');
 
     Route::middleware('auth')->group(function () {
@@ -48,6 +102,25 @@ Route::get('/dashboard', function () {
             // Attachment management
             Route::delete('/attachments/{attachment}', [TaskController::class, 'destroyAttachment'])
                 ->name('attachments.destroy');
+        });
+
+            Route::prefix('connections')->name('connections.')->group(function () {
+            Route::get('/', [ConnectionController::class, 'index'])->name('index');
+            Route::post('/', [ConnectionController::class, 'store'])->name('store');
+            Route::put('/{connection}', [ConnectionController::class, 'update'])->name('update');
+            Route::delete('/{connection}', [ConnectionController::class, 'destroy'])->name('destroy');
+        });
+
+        // --- GROUPS ---
+        Route::prefix('groups')->name('groups.')->group(function () {
+            Route::get('/', [GroupController::class, 'index'])->name('index');
+            Route::post('/', [GroupController::class, 'store'])->name('store');
+            Route::get('/{group}', [GroupController::class, 'show'])->name('show');
+            Route::delete('/{group}', [GroupController::class, 'destroy'])->name('destroy');
+            
+            // Group Members Management
+            Route::post('/{group}/members', [GroupController::class, 'addMember'])->name('members.add');
+            Route::delete('/{group}/members/{user}', [GroupController::class, 'removeMember'])->name('members.remove');
         });
     });
 

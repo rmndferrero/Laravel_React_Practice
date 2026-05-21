@@ -64,17 +64,25 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
-        $data            = $this->validateTask($request);
-        $data['user_id'] = Auth::id();
+        // 1. Update the validation rules to include the new columns
+        $validated = $request->validate([
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'status'      => 'required|string',
+            'priority'    => 'required|string',
+            'due_at'      => 'nullable|date',
+            'tags'        => 'nullable|string',
+            'group_id'    => 'nullable|exists:groups,id', // <-- Added
+            'assigned_to' => 'nullable|exists:users,id',  // <-- Added
+            'attachments.*' => 'nullable|file|max:10240', 
+        ]);
 
-        $task = Task::create($data);
+        // 2. Create the task (It will automatically attach the creator's user_id)
+        $task = $request->user()->tasks()->create($validated);
 
-        if ($request->hasFile('attachments')) {
-            $this->storeAttachments($task, $request->file('attachments'));
-        }
+        // ... (Keep your existing attachment upload logic here) ...
 
-        return redirect()->route('tasks.index')
-            ->with('success', 'Task created.');
+        return back()->with('success', 'Task created successfully.');
     }
 
     // ── Update ────────────────────────────────────────────────────────────────
